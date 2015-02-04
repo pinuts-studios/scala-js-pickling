@@ -25,7 +25,13 @@ object PicklerMaterializersImpl {
       accessor <- accessors
     } yield {
       val fieldName = accessor.name.toTermName
-      val fieldString = fieldName.toString()
+      val anns = accessor.annotations
+      println(s"DEBUGGGGGG!!!!!!!!!!! anns: $anns")
+      val possibleName = anns.headOption.map(_.tree.children.last.productElement(0)).map { case Constant(name) => name.toString }
+      println(s"DEBUGGGGGG!!!!!!!!!!! possibleName: $possibleName")
+      val fieldString = possibleName getOrElse fieldName.toString
+      println(s"DEBUGGGGGG!!!!!!!!!!! fieldString: $fieldString")
+      //val fieldString = fieldName.toString()
       q"""
         ($fieldString, registry.pickle(value.$fieldName))
       """
@@ -68,7 +74,9 @@ object PicklerMaterializersImpl {
       accessor <- accessors
     } yield {
       val fieldName = accessor.name
-      val fieldString = fieldName.toString()
+      val anns = accessor.annotations
+      val possibleName = anns.headOption.map(_.tree.children.last.productElement(0)).map { case Constant(name) => name.toString }
+      val fieldString = possibleName getOrElse fieldName.toString
       val fieldTpe = accessor.returnType
       q"""
         registry.unpickle[$fieldTpe, P](reader.readObjectField(
