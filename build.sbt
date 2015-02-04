@@ -2,7 +2,7 @@ import PicklingBuild.enableQuasiquotesIn210
 
 val commonSettings = Seq(
     organization := "org.scalajs",
-    version := "0.4-SNAPSHOT",
+    version := "0.4.746887-SNAPSHOT",
     normalizedName ~= { _.replace("scala-js", "scalajs") },
     homepage := Some(url("http://scala-js.org/")),
     licenses += ("BSD New", url("https://github.com/scala-js/scala-js/blob/master/LICENSE")),

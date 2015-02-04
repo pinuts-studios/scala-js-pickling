@@ -18,8 +18,8 @@ trait PicklersTest extends TestSuite {
     assert(actualPickleWrapped == expectedPickleWrapped)
   }
 
-  def expectUnpickleEqual(pickle: js.Any, expectedValue: Any): Unit = {
-    val actualValue = PicklerRegistry.unpickle(pickle)
+  def expectUnpickleEqual[A : ClassTag](pickle: js.Any, expectedValue: A): Unit = {
+    val actualValue: A = PicklerRegistry.unpickle(pickle)
     assert(actualValue == expectedValue)
   }
 }

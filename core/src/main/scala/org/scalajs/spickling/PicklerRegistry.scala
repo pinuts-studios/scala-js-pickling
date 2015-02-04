@@ -12,8 +12,8 @@ object PicklerRegistry extends BasePicklerRegistry {
 trait PicklerRegistry {
   def pickle[P](value: Any)(implicit builder: PBuilder[P],
       registry: PicklerRegistry = this): P
-  def unpickle[P](pickle: P)(implicit reader: PReader[P],
-      registry: PicklerRegistry = this): Any
+  def unpickle[A : ClassTag, P](pickle: P)(implicit reader: PReader[P],
+      registry: PicklerRegistry = this): A
 }
 
 class BasePicklerRegistry extends PicklerRegistry {
@@ -61,26 +61,23 @@ class BasePicklerRegistry extends PicklerRegistry {
             case name                                 => name
           }
           val pickler = picklers(className)
-          val pickledValue = pickler.pickle[P](value.asInstanceOf[pickler.Picklee])
-          builder.makeObject(
-              ("t", builder.makeString(className)),
-              ("v", pickledValue))
+          pickler.pickle[P](value.asInstanceOf[pickler.Picklee])
       }
     }
   }
 
-  def unpickle[P](pickle: P)(implicit reader: PReader[P],
-      registry: PicklerRegistry): Any = {
+  def unpickle[A : ClassTag, P](pickle: P)(implicit reader: PReader[P],
+      registry: PicklerRegistry): A = {
     if (reader.isNull(pickle)) {
-      null
+      null.asInstanceOf[A]
     } else {
       val s = reader.readObjectField(pickle, "s")
       if (!reader.isUndefined(s)) {
-        singletonsRev(reader.readString(s))
+        singletonsRev(reader.readString(s)).asInstanceOf[A]
       } else {
-        val className = reader.readString(reader.readObjectField(pickle, "t"))
-        val unpickler = unpicklers(className)
-        unpickler.unpickle[P](reader.readObjectField(pickle, "v"))
+        val className = implicitly[ClassTag[A]].runtimeClass.getName
+        val unpickler = unpicklers(className).asInstanceOf[Unpickler[A]]
+        unpickler.unpickle[P](pickle)
       }
     }
   }

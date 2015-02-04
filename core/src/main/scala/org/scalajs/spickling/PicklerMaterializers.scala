@@ -2,7 +2,7 @@ package org.scalajs.spickling
 
 import scala.language.experimental.macros
 
-import scala.reflect.macros.Context
+import scala.reflect.macros.blackbox.Context
 
 object PicklerMaterializersImpl {
   def materializePickler[T: c.WeakTypeTag](c: Context): c.Expr[Pickler[T]] = {
@@ -71,8 +71,8 @@ object PicklerMaterializersImpl {
       val fieldString = fieldName.toString()
       val fieldTpe = accessor.returnType
       q"""
-        registry.unpickle(reader.readObjectField(
-            pickle, $fieldString)).asInstanceOf[$fieldTpe]
+        registry.unpickle[$fieldTpe, P](reader.readObjectField(
+            pickle, $fieldString))
       """
     }
 

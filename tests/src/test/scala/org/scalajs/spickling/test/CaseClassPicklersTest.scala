@@ -2,46 +2,57 @@ package org.scalajs.spickling
 package test
 
 import scala.scalajs.js
-import scala.scalajs.js.Dynamic.{ literal => lit }
+import scala.scalajs.js.Dynamic.{literal => lit}
 
 import utest._
 
-case class Person(name: String, age: Int)
+case class Person(name: String, age: Int, smokes: Boolean, cat: Cat)
+
+case class Cat(name: String, likeDogs: Boolean)
 
 case object TrivialCaseObject
 
 object CaseClassPicklersTest extends PicklersTest {
 
   PicklerRegistry.register[Person]
+  PicklerRegistry.register[Cat]
   PicklerRegistry.register(TrivialCaseObject)
 
   val tests = TestSuite {
     "pickle a Person" - {
       expectPickleEqual(
-          Person("Jack", 24),
-          lit(t = "org.scalajs.spickling.test.Person", v = lit(
-              name = lit(t = "java.lang.String", v = "Jack"),
-              age = lit(t = "java.lang.Integer", v = 24))))
+        Person("Jack", 24, smokes = false, Cat("Bobby", likeDogs = false)),
+        lit(name = "Jack",
+          age = 24,
+          smokes = false,
+          cat = lit(
+            name = "Bobby",
+            likeDogs = false
+          )))
     }
 
     "unpickle a Person" - {
-      expectUnpickleEqual(
-          lit(t = "org.scalajs.spickling.test.Person", v = lit(
-              name = lit(t = "java.lang.String", v = "Jack"),
-              age = lit(t = "java.lang.Integer", v = 24))),
-          Person("Jack", 24))
+      expectUnpickleEqual[Person](
+        lit(name = "Jack",
+          age = 24,
+          smokes = false,
+          cat = lit(
+            name = "Bobby",
+            likeDogs = false
+          )),
+        Person("Jack", 24, smokes = false, Cat("Bobby", likeDogs = false)))
     }
 
     "pickle TrivialCaseObject" - {
       expectPickleEqual(
-          TrivialCaseObject,
-          lit(s = "org.scalajs.spickling.test.TrivialCaseObject$"))
+        TrivialCaseObject,
+        lit(s = "org.scalajs.spickling.test.TrivialCaseObject$"))
     }
 
     "unpickle TrivialCaseObject" - {
       expectUnpickleEqual(
-          lit(s = "org.scalajs.spickling.test.TrivialCaseObject$"),
-          TrivialCaseObject)
+        lit(s = "org.scalajs.spickling.test.TrivialCaseObject$"),
+        TrivialCaseObject)
     }
   }
 }
